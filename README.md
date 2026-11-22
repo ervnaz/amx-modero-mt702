@@ -9,7 +9,7 @@ This repo documents the whole journey, the dead ends, and — more usefully — 
 device tree) that anyone reviving one of these panels will need.
 
 > **Status:** Android/HA panel = **done and working**. Mainline Debian port =
-> **in progress**, blocked on U‑Boot SPL bring-up (see [§5](#5-bare-metal-linux-debian--in-progress)).
+> **in progress** — the silent-U-Boot mystery is diagnosed (the board boots via an i.MX6 boot-ROM *plugin* that mainline lacks), and the plan is now to ride the stock bootloader and hand it our mainline kernel (see [§5](#5-bare-metal-linux-debian--in-progress)).
 
 ---
 
@@ -122,14 +122,23 @@ Built so far (all cross-compiled on the PC):
 - **First-draft device tree** [`dts/imx6q-modero.dts`](dts/imx6q-modero.dts).
 - SD assembly / U-Boot update scripts in [`sdcard/`](sdcard/).
 
-**Current blocker:** the ported U-Boot **SPL is completely silent** — no output *even
-before DDR init* (we reordered `board_init_f` to bring the console up first, with
-diagnostic `puts()`, and it still prints nothing). Verified: the build is really on the
-card, the capture chain works, the image is valid (IVT `self=0x907400`, load 44 KB fits
-OCRAM), `CONS_INDEX=1` (UART1, same pads as stock). So it's **not DDR and not
-console-config** — the SPL simply isn't running or isn't outputting, cause TBD.
-**Next step:** disassemble the stock SPL (which boots perfectly on this exact board)
-to see what early clock/PLL/UART setup it does that mainline is missing.
+**Diagnosed — and a deliberate pivot.** The ported U-Boot came up **dead silent, even
+before DDR init** (we reordered `board_init_f` to bring the console up first, with
+diagnostic `puts()`, and it still printed nothing). Disassembling the stock boot image
+cracked it: **this board boots via the i.MX6 boot-ROM *plugin* mechanism** (`plugin=1`
+in the image header) — a small OCRAM routine inits DDR (reading a 3-bit board-ID to pick
+the config) and **returns to the boot ROM**, which then loads the real U-Boot. Our
+mainline SPL uses the normal load-and-jump flow (`plugin=0`), and **mainline has no i.MX6
+plugin** (that code targets i.MX8/9), so the ROM never runs ours.
+
+**Decision: keep the stock bootloader.** It inits DDR flawlessly and boots a kernel via
+`booti`, so rather than hand-write an i.MX6 plugin to re-solve DDR, we hand the stock
+bootloader *our* mainline kernel (appended DTB, wrapped as a boot image) with Debian boot
+args. Distro/security updates then behave like any Debian box; only *kernel* updates need
+a rebuild-and-reflash (scriptable). A clean mainline U-Boot (writing that plugin) is a
+later, optional project. **Next step:** build the kernel with `CONFIG_ARM_APPENDED_DTB`,
+wrap it as a boot image `booti` accepts, flash it to the boot partition, set Debian
+`bootargs` (`root=/dev/mmcblk0pX` instead of Android's `init=/init`).
 
 ---
 
