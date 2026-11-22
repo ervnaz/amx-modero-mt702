@@ -4,7 +4,7 @@
 # ext4 partition labelled 'rootfs' (i.e. our Debian card, NOT the stock Android card).
 set -e
 DEV=/dev/sdb
-IMG=/home/ervin/modero-debian/u-boot/u-boot-with-spl.imx
+IMG=/home/ervin/modero-debian/u-boot-modero-dcd.imx
 [ "$(id -u)" = 0 ] || { echo "run as root (sudo)"; exit 1; }
 
 tran=$(lsblk -dn -o TRAN "$DEV" 2>/dev/null); hp=$(lsblk -dn -o HOTPLUG "$DEV" 2>/dev/null)
@@ -24,10 +24,10 @@ echo ">> writing new U-Boot (DDR-fixed) to 1KiB offset"
 dd if="$IMG" of="$DEV" bs=1K seek=1 conv=fsync status=none
 sync
 echo ">> verifying what's actually on the card now..."
-if dd if="$DEV" bs=1024 skip=1 count=760 2>/dev/null | strings | grep -q 'MODERO SPL'; then
-  echo "    ✓ VERIFIED: the diagnostic SPL build IS on the card"
+if dd if="$DEV" bs=1024 skip=1 count=760 2>/dev/null | strings | grep -qi 'U-Boot 20'; then
+  echo "    ✓ VERIFIED: the DCD U-Boot IS on the card"
 else
-  echo "    ⚠ WARNING: diagnostic 'MODERO SPL' string NOT found on the card after write!"
+  echo "    ⚠ WARNING: 'U-Boot 20..' string NOT found on the card after write!"
 fi
 echo "=== U-BOOT UPDATED (DDR config patched). Rootfs/kernel untouched. ==="
 echo "    Move the card to the panel, power on, watch the console."

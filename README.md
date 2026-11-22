@@ -9,7 +9,7 @@ This repo documents the whole journey, the dead ends, and — more usefully — 
 device tree) that anyone reviving one of these panels will need.
 
 > **Status:** Android/HA panel = **done and working**. Mainline Debian port =
-> **in progress** — the silent-U-Boot mystery is diagnosed (the board boots via an i.MX6 boot-ROM *plugin* that mainline lacks), and the plan is now to ride the stock bootloader and hand it our mainline kernel (see [§5](#5-bare-metal-linux-debian--in-progress)).
+> **in progress** — the silent-U-Boot mystery is solved: the board needs the non-SPL/DCD U-Boot build mode (which takes our extracted DDR directly); that U-Boot is built, verified, and awaiting one boot test (see [§5](#5-bare-metal-linux-debian--in-progress)).
 
 ---
 
@@ -131,20 +131,25 @@ the config) and **returns to the boot ROM**, which then loads the real U-Boot. O
 mainline SPL uses the normal load-and-jump flow (`plugin=0`), and **mainline has no i.MX6
 plugin** (that code targets i.MX8/9), so the ROM never runs ours.
 
-**Decision: keep the stock bootloader.** It inits DDR flawlessly and boots a kernel via
-`booti`, so rather than hand-write an i.MX6 plugin to re-solve DDR, we hand the stock
-bootloader *our* mainline kernel (appended DTB, wrapped as a boot image) with Debian boot
-args. Distro/security updates then behave like any Debian box; only *kernel* updates need
-a rebuild-and-reflash (scriptable). A clean, modern U-Boot is a later,
-optional project — and the better route for it is **NXP's `uboot-imx`** (the vendor fork
-AMX itself built the stock loader from — note the stock build path `.../uboot-imx/...`),
-which *has* the i.MX6 plugin mainline lacks. A recent `uboot-imx` for `mx6qsabresd` in
-plugin mode + our captured DDR values would boot on this board's ROM *and* bring
-extlinux/distro-boot (erasing the kernel-reflash friction). That's just one component
-from NXP's git — not a switch to their Yocto BSP; the Debian rootfs stays. i.MX6Q is
-still supported in NXP's current BSP (Linux 6.18, 2026). **Next step:** build the kernel with `CONFIG_ARM_APPENDED_DTB`,
-wrap it as a boot image `booti` accepts, flash it to the boot partition, set Debian
-`bootargs` (`root=/dev/mmcblk0pX` instead of Android's `init=/init`).
+**The fix — simpler than any of that: non-SPL / DCD mode.** We'd only ever built U-Boot in
+*SPL* mode. Mainline's *other* i.MX6 boot mode — **non-SPL / DCD** (the classic flow) — puts
+a **DCD** (a table of register writes) in the image header that the **boot ROM itself
+applies** to bring up DDR, then loads U-Boot into DDR and runs it. A DCD *is exactly* our
+extracted DDR data: the 83 register writes drop straight into an `imximage.cfg`
+([`uboot/modero-dcd.cfg`](uboot/modero-dcd.cfg)), built from `mx6modero_defconfig` with
+`CONFIG_SPL` off → **[`uboot/u-boot-modero-dcd.imx`](uboot/)** (verified: valid DCD, our
+exact values, loads into DDR). No plugin to hand-write, no ancient vendor bootloader, and a
+clean device-tree kernel boot (`extlinux`) — so kernel updates stay a file edit, not a
+reflash. On i.MX6 the DCD path is the one [reported to boot where SPL doesn't](https://lists.denx.de/pipermail/u-boot/2016-September/267780.html).
+**Next step:** one boot test to confirm (flash with [`sdcard/update-uboot.sh`](sdcard/update-uboot.sh)),
+then wire `extlinux` to our `zImage` + DTB.
+
+> **Lesson (see the write-up's "rabbit hole" section).** We spent days hand-rolling an SPL
+> bring-up and nearly settled for keeping the 2009 vendor bootloader — when mainline's DCD
+> build mode, which takes our DDR data directly, built in two minutes. For a *known* board
+> (i.MX6 SABRE-SD-class), survey what already exists before hand-rolling. The board-specific
+> work (console pinout, live DDR extraction) was real and necessary; the days-long blocker
+> was just a build-mode choice the ecosystem had solved long ago.
 
 ---
 
