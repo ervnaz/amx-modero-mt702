@@ -1,0 +1,427 @@
+
+
+U-Boot 2009.08 (Aug 12 2018 - 18:57:47)
+
+CPU: Freescale i.MX6 family TO1.5 at 792 MHz
+CPU Temp Grade: Automotive
+Thermal sensor with ratio = 185
+Temperature:   23 C, calibration data 0x5914ee7d
+mx6q pll1: 792MHz
+mx6q pll2: 528MHz
+mx6q pll3: 480MHz
+mx6q pll8: 50MHz
+ipg clock     : 66000000Hz
+ipg per clock : 66000000Hz
+uart clock    : 80000000Hz
+cspi clock    : 60000000Hz
+ahb clock     : 132000000Hz
+axi clock   : 264000000Hz
+emi_slow clock: 132000000Hz
+ddr clock     : 528000000Hz
+usdhc1 clock  : 198000000Hz
+usdhc2 clock  : 198000000Hz
+usdhc3 clock  : 198000000Hz
+usdhc4 clock  : 198000000Hz
+nfc clock     : 24000000Hz
+Board: i.MX6Q-ModeroX:  Board ID:0x15, SOM Rev:0x2, Board Rev:0x0 [POR ]
+Boot Device: SD
+I2C:   ready
+DRAM:   2 GB
+MMC:   FSL_USDHC: 0,FSL_USDHC: 1,FSL_USDHC: 2,FSL_USDHC: 3
+Using default environment
+
+Calculated CRC EB28544F -- RXed CRC EB28544F
+
+--------------------------------------------
+Number  of entries 4
+rotate =   0
+ethaddr =   00:60:9F:A5:B3:ED
+serial_no =   15100161790
+In:    serial
+Out:   serial
+Err:   serial
+Found PFUZE100! deviceid=10,revid=21
+Reseting audio codec...
+Initializing SOM Board USB Hub (USB3503)
+Net:   got MAC address from IIM: 00:60:9f:a5:b3:ed
+FEC0 [PRIME]
+Hit any key to stop autoboot:  0 
+kernel   @ 10808000 (4151636)
+ramdisk  @ 11800000 (189296)
+kernel cmdline: 
+	use uboot command line:
+	console=ttymxc0,115200 androidboot.console=ttymxc0 androidboot.hardware=freescale vmalloc=400M init=/init printk.time=1 video=mxcfb0:dev=ldb,800x1280@60,if=RGB24,bpp=32 ldb=sin0 video=mxcfb1:off video=mxcfb2:off fbmem=28M boardId=0x15 somRev=0x2 appRev=0x0 rotate=0 androidboot.bootloader=v1.8.14 ethaddr=00:60:9F:A5:B3:ED androidboot.serialno=15100161790 grade=Auto 
+
+Starting kernel ...
+
+Initializing cgroup subsys cpu
+Linux version 3.0.35 (build@hqengbs02) (gcc version 4.6.x-google 20120106 (prerelease) (GCC) ) #1 SMP PREEMPT Sun Aug 12 19:00:39 CDT 2018
+CPU: ARMv7 Processor [412fc09a] revision 10 (ARMv7), cr=10c53c7d
+CPU: VIPT nonaliasing data cache, VIPT aliasing instruction cache
+Machine: AMX i.MX6 Quad Modero-X Board
+Ignoring unrecognised tag 0x54410008
+(asix)early_ethaddr----MAC [00:60:9f:a5:b3:ed]
+Memory policy: ECC disabled, Data cache writealloc
+CPU identified as i.MX6Q, silicon rev 1.5
+PERCPU: Embedded 7 pages/cpu @c283c000 s6592 r8192 d13888 u32768
+Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 443136
+Kernel command line: console=ttymxc0,115200 androidboot.console=ttymxc0 androidboot.hardware=freescale vmalloc=400M init=/init printk.time=1 video=mxcfb0:dev=ldb,800x1280@60,if=RGB24,bpp=32 ldb=sin0 video=mxcfb1:off video=mxcfb2:off fbmem=28M boardId=0x15 somRev=0x2 appRev=0x0 rotate=0 androidboot.bootloader=v1.8.14 ethaddr=00:60:9F:A5:B3:ED androidboot.serialno=15100161790 grade=Auto
+[    0.000000] PID hash table entries: 2048 (order: 1, 8192 bytes)
+[    0.000000] Dentry cache hash table entries: 65536 (order: 6, 262144 bytes)
+[    0.000000] Inode-cache hash table entries: 32768 (order: 5, 131072 bytes)
+[    0.000000] Memory: 1507MB 240MB = 1747MB total
+[    0.000000] Memory: 1761944k/1761944k available, 335208k reserved, 1379328K highmem
+[    0.000000] Virtual kernel memory layout:
+[    0.000000]     vector  : 0xffff0000 - 0xffff1000   (   4 kB)
+[    0.000000]     fixmap  : 0xfff00000 - 0xfffe0000   ( 896 kB)
+[    0.000000]     DMA     : 0xfbe00000 - 0xffe00000   (  64 MB)
+[    0.000000]     vmalloc : 0xd9800000 - 0xf2000000   ( 392 MB)
+[    0.000000]     lowmem  : 0xc0000000 - 0xd9000000   ( 400 MB)
+[    0.000000]     pkmap   : 0xbfe00000 - 0xc0000000   (   2 MB)
+[    0.000000]     modules : 0xbf000000 - 0xbfe00000   (  14 MB)
+[    0.000000]       .init : 0xc0008000 - 0xc003c000   ( 208 kB)
+[    0.000000]       .text : 0xc003c000 - 0xc0791e84   (7512 kB)
+[    0.000000]       .data : 0xc0792000 - 0xc080e9e8   ( 499 kB)
+[    0.000000]        .bss : 0xc080ea0c - 0xc099afe8   (1586 kB)
+[    0.000000] Preemptible hierarchical RCU implementation.
+[    0.000000] NR_IRQS:624
+[    0.000000] MXC GPIO hardware
+[    0.000000] sched_clock: 32 bits at 3000kHz, resolution 333ns, wraps every 1431655ms
+[    0.000000] arm_max_freq=1GHz
+[    0.000000] MXC_Early serial console at MMIO 0x2020000 (options '115200')
+[    0.000000] bootconsole [ttymxc0] enabled
+[    0.224164] Calibrating delay loop... 1581.05 BogoMIPS (lpj=7905280)
+[    0.316897] pid_max: default: 32768 minimum: 301
+[    0.321758] Mount-cache hash table entries: 512
+[    0.327040] Initializing cgroup subsys debug
+[    0.331334] Initializing cgroup subsys cpuacct
+[    0.335835] Initializing cgroup subsys freezer
+[    0.340362] CPU: Testing write buffer coherency: ok
+[    0.345518] hw perfevents: enabled with ARMv7 Cortex-A9 PMU driver, 7 counters available
+[    0.466211] CPU1: Booted secondary processor
+[    0.566207] CPU2: Booted secondary processor
+[    0.666201] CPU3: Booted secondary processor
+[    0.725546] Brought up 4 CPUs
+[    0.741377] SMP: Total of 4 processors activated (6324.22 BogoMIPS).
+[    0.772235] print_constraints: dummy: 
+[    0.776283] NET: Registered protocol family 16
+[    0.785615] print_constraints: vddpu: 725 <--> 1300 mV at 700 mV fast normal 
+[    0.793132] print_constraints: vddcore: 725 <--> 1300 mV at 1150 mV fast normal 
+[    0.800976] print_constraints: vddsoc: 725 <--> 1300 mV at 1200 mV fast normal 
+[    0.808696] print_constraints: vdd2p5: 2000 <--> 2775 mV at 2400 mV fast normal 
+[    0.816503] print_constraints: vdd1p1: 800 <--> 1400 mV at 1100 mV fast normal 
+[    0.824216] print_constraints: vdd3p0: 2625 <--> 3400 mV at 3000 mV fast normal 
+[    0.833356] Initializing Board MT-702 HWID 0x207, boardId 0x15, somRev 0x2, appRev 0x0
+[    0.886663] ram_console: got buffer at 7e300000, size 100000
+[    0.892475] ram_console: error in header, 4
+[    0.896700] ram_console: no valid data in buffer (sig = 0x00000000)
+[    0.909828] console [ram-1] enabled
+[    0.922658] imx6q_add_device_buttons: ModeroX add keys
+[    0.928234] imx6q_add_device_buttons: ModeroX add keys (1)
+[    0.935467] hw-breakpoint: found 6 breakpoint and 1 watchpoint registers.
+[    0.942391] hw-breakpoint: 1 breakpoint(s) reserved for watchpoint single-step.
+[    0.949903] hw-breakpoint: maximum watchpoint size is 4 bytes.
+[    0.955950] L310 cache controller enabled
+[    0.960058] l2x0: 16 ways, CACHE_ID 0x410000c7, AUX_CTRL 0x32070000, Cache size: 1048576 B
+[    0.970997] IMX usb wakeup probe
+[    0.974409] the wakeup pdata is 0xd614daa0
+[    1.010525] bio: create slab <bio-0> at 0
+[    1.015613] print_constraints: VDDA: 3300 mV 
+[    1.020322] print_constraints: VDDIO: 3300 mV 
+[    1.025093] machine_constraints_voltage: VDDD: unsupportable voltage constraints
+[    1.032838] reg-fixed-voltage reg-fixed-voltage.2: Failed to register regulator: -22
+[    1.040784] reg-fixed-voltage: probe of reg-fixed-voltage.2 failed with error -22
+[    1.049877] SCSI subsystem initialized
+[    1.054578] usbcore: registered new interface driver usbfs
+[    1.060358] usbcore: registered new interface driver hub
+[    1.066044] usbcore: registered new device driver usb
+[    1.071201] Freescale USB OTG Driver loaded, $Revision: 1.55 $
+[    1.078858] mc_pfuze 0-0008: ID: 0,Full lay: 2 ,Metal lay: 1
+[    1.084839] mc_pfuze 0-0008: FAB: 0 ,FIN: 0
+[    1.094700] print_constraints: PFUZE100_SW1A: 300 <--> 1875 mV at 1300 mV 
+[    1.102173] print_constraints: PFUZE100_SW1B: 300 <--> 1875 mV at 300 mV 
+[    1.110005] print_constraints: PFUZE100_SW1C: 300 <--> 1875 mV at 1300 mV 
+[    1.117470] print_constraints: PFUZE100_SW2: 800 <--> 3950 mV at 3300 mV 
+[    1.124877] print_constraints: PFUZE100_SW3A: 400 <--> 1975 mV at 1350 mV 
+[    1.132407] print_constraints: PFUZE100_SW3B: 400 <--> 1975 mV at 1350 mV 
+[    1.139880] print_constraints: PFUZE100_SW4: 800 <--> 3950 mV at 3150 mV 
+[    1.147325] print_constraints: PFUZE100_SWBST: 5000 <--> 5150 mV at 5000 mV 
+[    1.154947] print_constraints: PFUZE100_VSNVS: 1200 <--> 3000 mV at 1800 mV 
+[    1.162805] print_constraints: PFUZE100_VREFDDR: at 750 mV 
+[    1.168990] print_constraints: PFUZE100_VGEN1: 800 <--> 1550 mV at 1500 mV 
+[    1.176506] print_constraints: PFUZE100_VGEN2: 800 <--> 1550 mV at 1500 mV 
+[    1.184090] print_constraints: PFUZE100_VGEN3: 1800 <--> 3300 mV at 2800 mV 
+[    1.192085] print_constraints: PFUZE100_VGEN4: 1800 <--> 3300 mV at 1800 mV 
+[    1.200164] print_constraints: PFUZE100_VGEN5: 1800 <--> 3300 mV at 3000 mV 
+[    1.207855] print_constraints: PFUZE100_VGEN6: 1800 <--> 3300 mV at 3300 mV 
+[    1.235630] imx-ipuv3 imx-ipuv3.0: IPU DMFC NORMAL mode: 1(0~1), 5B(4,5), 5F(6,7)
+[    1.255641] imx-ipuv3 imx-ipuv3.1: IPU DMFC NORMAL mode: 1(0~1), 5B(4,5), 5F(6,7)
+[    1.263812] MIPI CSI2 driver module loaded
+[    1.268319] Advanced Linux Sound Architecture Driver Version 1.0.24.
+[    1.275935] Bluetooth: Core ver 2.16
+[    1.279761] NET: Registered protocol family 31
+[    1.284306] Bluetooth: HCI device and connection manager initialized
+[    1.290850] Bluetooth: HCI socket layer initialized
+[    1.295837] Bluetooth: L2CAP socket layer initialized
+[    1.301068] Bluetooth: SCO socket layer initialized
+[    1.306079] Switching to clocksource mxc_timer1
+[    1.322908] NET: Registered protocol family 2
+[    1.327553] IP route cache hash table entries: 16384 (order: 4, 65536 bytes)
+[    1.335258] TCP established hash table entries: 65536 (order: 7, 524288 bytes)
+[    1.343645] TCP bind hash table entries: 65536 (order: 7, 786432 bytes)
+[    1.351597] TCP: Hash tables configured (established 65536 bind 65536)
+[    1.358223] TCP reno registered
+[    1.361548] UDP hash table entries: 256 (order: 1, 8192 bytes)
+[    1.367491] UDP-Lite hash table entries: 256 (order: 1, 8192 bytes)
+[    1.374339] NET: Registered protocol family 1
+[    1.379202] RPC: Registered named UNIX socket transport module.
+[    1.385325] RPC: Registered udp transport module.
+[    1.390125] RPC: Registered tcp transport module.
+[    1.394952] RPC: Registered tcp NFSv4.1 backchannel transport module.
+[    1.401724] Unpacking initramfs...
+[    1.418084] Freeing initrd memory: 184K
+[    1.423109] PMU: registered new PMU device of type 0
+[    1.428315] Static Power Management for Freescale i.MX6
+[    1.433733] wait mode is enabled for i.MX6
+[    1.438125] cpaddr = d9880000 suspend_iram_base=d98e8000
+[    1.443645] PM driver module loaded
+[    1.447552] IMX usb wakeup probe
+[    1.450988] the wakeup pdata is 0xd65f0fa0
+[    1.455586] add wake up source irq 75
+[    1.463123] IMX usb wakeup probe
+[    1.466531] the wakeup pdata is 0xd65f0d20
+[    1.470962] cpu regulator mode:ldo_bypass
+[    1.475999] _regulator_get: get() with no identifier
+[    1.481081] mx6_cpu_regulator_init: failed to get pu regulator
+[    1.488037] i.MXC CPU frequency driver
+[    1.513437] highmem bounce pool size: 64 pages
+[    1.518224] ashmem: initialized
+[    1.522725] NTFS driver 2.1.30 [Flags: R/O].
+[    1.527182] fuse init (API version 7.16)
+[    1.531441] msgmni has been set to 747
+[    1.536381] NET: Registered protocol family 38
+[    1.541084] cryptodev: driver loaded.
+[    1.544838] io scheduler noop registered
+[    1.548892] io scheduler deadline registered
+[    1.553333] io scheduler cfq registered (default)
+[    1.558991] mxc_sdc_fb mxc_sdc_fb.0: register mxc display driver ldb
+[    1.565524] _regulator_get: get() with no identifier
+[    1.570569] mxc_ldb mxc_ldb: change IPU DI1 to IPU DI0 for LDB channel0.
+[    1.642827] mxc_sdc_fb mxc_sdc_fb.1: Can't get fb option for mxcfb1!
+[    1.649932] imx-sdma imx-sdma: loaded firmware 1.1
+[    1.659758] imx-sdma imx-sdma: initialized
+[    1.784192] Serial: IMX driver
+[    1.787503] imx-uart.1: ttymxc1 at MMIO 0x21e8000 (irq = 59) is a IMX
+[    1.794495] imx-uart.0: ttymxc0 at MMIO 0x2020000 (irq = 58) is a IMX
+[    1.801136] console [ttymxc0] enabled, bootconsole disabled
+[    1.801136] console [ttymxc0] enabled, bootconsole disabled
+[    1.818702] loop: module loaded
+[    1.822038] ad_dpot 1-002f: ad5243 256-Position Digital Potentiometer registered
+[    1.829518] ad_dpot 1-002c: ad5245 256-Position Digital Potentiometer registered
+[    1.837220] at24 0-0050: 256 byte 24c02 EEPROM, writable, 1 bytes/write
+[    1.844345] FEC Ethernet Driver
+[    1.850491] fec_enet_mii_bus: probed
+[    1.854830] tun: Universal TUN/TAP device driver, 1.6
+[    1.859951] tun: (C) 1999-2004 Max Krasnyansky <maxk@qualcomm.com>
+[    1.866623] usbcore: registered new interface driver asix
+[    1.872315] usbcore: registered new interface driver cdc_ether
+[    1.878336] usbcore: registered new interface driver net1080
+[    1.884273] usbcore: registered new interface driver cdc_subset
+[    1.890379] usbcore: registered new interface driver zaurus
+[    1.896101] cdc_ncm: 04-Aug-2011
+[    1.899518] usbcore: registered new interface driver cdc_ncm
+[    1.905263] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+[    1.912031] add wake up source irq 73
+[    1.915776] fsl-ehci fsl-ehci.2: Freescale On-Chip EHCI Host Controller
+[    1.922541] fsl-ehci fsl-ehci.2: new USB bus registered, assigned bus number 1
+[    1.950845] fsl-ehci fsl-ehci.2: irq 73, io base 0x02184400
+[    1.970844] fsl-ehci fsl-ehci.2: USB 2.0 started, EHCI 1.00
+[    1.977175] hub 1-0:1.0: USB hub found
+[    1.981081] hub 1-0:1.0: 1 port detected
+[    1.985301] fsl-ehci fsl-ehci.0: Freescale On-Chip EHCI Host Controller
+[    1.992080] fsl-ehci fsl-ehci.0: new USB bus registered, assigned bus number 2
+[    2.020848] fsl-ehci fsl-ehci.0: irq 75, io base 0x02184000
+[    2.040835] fsl-ehci fsl-ehci.0: USB 2.0 started, EHCI 1.00
+[    2.047081] hub 2-0:1.0: USB hub found
+[    2.050989] hub 2-0:1.0: 1 port detected
+[    2.055167] add wake up source irq 72
+[    2.058933] fsl-ehci fsl-ehci.1: Freescale On-Chip EHCI Host Controller
+[    2.065699] fsl-ehci fsl-ehci.1: new USB bus registered, assigned bus number 3
+[    2.100843] fsl-ehci fsl-ehci.1: irq 72, io base 0x02184200
+[    2.120834] fsl-ehci fsl-ehci.1: USB 2.0 started, EHCI 1.00
+[    2.127112] hub 3-0:1.0: USB hub found
+[    2.130956] hub 3-0:1.0: 1 port detected
+[    2.135167] Initializing USB Mass Storage driver...
+[    2.140351] usbcore: registered new interface driver usb-storage
+[    2.146440] USB Mass Storage support registered.
+[    2.151249] usb3503 1-0008: usb3503_probe: probed on  hub mode
+[    2.157273] ARC USBOTG Device Controller driver (1 August 2005)
+[    2.166678] android_usb gadget: Mass Storage Function, version: 2009/09/11
+[    2.173649] android_usb gadget: Number of LUNs=1
+[    2.178388]  lun0: LUN: removable file: (no medium)
+[    2.183870] Gadget Android: controller 'fsl-usb2-udc' not recognized
+[    2.190353] android_usb gadget: android_usb ready
+[    2.195139] Suspend udc for OTG auto detect
+[    2.199394] fsl-usb2-udc: bind to driver android_usb 
+[    2.205042] mousedev: PS/2 mouse device common for all mice
+[    2.211216] input: gpio-keys as /devices/platform/gpio-keys/input/input0
+[    2.218586] atmel_mxt_ts 2-005b: __mxt_read_reg: i2c transfer failed count=-5
+[    2.225867] atmel_mxt_ts 2-005b: Unable to get device info
+[    2.231444] atmel_mxt_ts: probe of 2-005b failed with error -5
+[    2.237528] atmel_mxt_ts 2-004b: __mxt_read_reg: i2c transfer failed count=-5
+[    2.244748] atmel_mxt_ts 2-004b: Unable to get device info
+[    2.250363] atmel_mxt_ts: probe of 2-004b failed with error -5
+[    2.277847] atmel_mxt_ts 2-004a: Chip: mxT336T V2.1/V3
+[    2.283145] atmel_mxt_ts 2-004a: Screen: 7 inch
+[    2.460835] usb 1-1: new high speed USB device number 2 using fsl-ehci
+[    2.580861] atmel_mxt_ts 2-004a: Family ID: 164 Variant ID: 21 Version: 34 Build: 170
+[    2.588793] atmel_mxt_ts 2-004a: Matrix X Size: 24 Matrix Y Size: 14 Object Num: 39
+[    2.596605] atmel_mxt_ts 2-004a: Configured number of fingers: 3
+[    2.605191] input: Atmel maXTouch Touchscreen as /devices/platform/imx-i2c.2/i2c-2/2-004a/input/input1
+[    2.615820] hub 1-1:1.0: USB hub found
+[    2.619839] hub 1-1:1.0: 1 port detected
+[    2.624983] using rtc device, snvs_rtc, for alarms
+[    2.629691] snvs_rtc snvs_rtc.0: rtc core: registered snvs_rtc as rtc0
+[    2.636766] i2c /dev entries driver
+[    2.641149] Linux video capture interface: v2.00
+[    2.646681] mxc_v4l2_output mxc_v4l2_output.0: V4L2 device registered as video16
+[    2.654374] mxc_v4l2_output mxc_v4l2_output.0: V4L2 device registered as video17
+[    2.662205] usbcore: registered new interface driver uvcvideo
+[    2.668075] USB Video Class driver (v1.1.0)
+[    2.672667] imx2-wdt imx2-wdt.0: IMX2+ Watchdog Timer enabled. timeout=60s (nowayout=1)
+[    2.681069] device-mapper: uevent: version 1.0.3
+[    2.686038] device-mapper: ioctl: 4.20.0-ioctl (2011-02-02) initialised: dm-devel@redhat.com
+[    2.695038] sdhci: Secure Digital Host Controller Interface driver
+[    2.701343] sdhci: Copyright(c) Pierre Ossman
+[    2.705956] mmc0: no vmmc regulator found
+[    2.710263] mmc0: SDHCI controller on platform [sdhci-esdhc-imx.1] using DMA
+[    2.717743] mxc_vdoa mxc_vdoa: i.MX Video Data Order Adapter(VDOA) driver probed
+[    2.729894] VPU initialized
+[    2.733150] Galcore version 4.6.9.9754
+[    2.765935] Thermal calibration data is 0x5914ee7d
+[    2.770814] Thermal sensor with ratio = 185
+[    2.775120] Thermal sensor CRITICAL   = 125 C
+[    2.779539] Thermal sensor HOT        = 120 C
+[    2.784111] Thermal sensor ACTIVE     = 110 C
+[    2.800831] Anatop Thermal registered as thermal_zone0
+[    2.806211] anatop_thermal_probe: default cooling device is cpufreq!
+[    2.814670] usbcore: registered new interface driver usbhid
+[    2.820312] usbhid: USB HID core driver
+[    2.824838] logger: created 256K log 'log_main'
+[    2.829660] logger: created 256K log 'log_events'
+[    2.834723] logger: created 256K log 'log_radio'
+[    2.839618] logger: created 256K log 'log_system'
+[    2.839671] mmc0: new high speed SDHC card at address 0007
+[    2.840126] mmcblk0: mmc0:0007 APUSD 14.9 GiB 
+[    2.844408]  mmcblk0: p1 p2 p3 < p5 p6 p7 p8 p9 > p4
+[    2.860554] usbcore: registered new interface driver snd-usb-audio
+[    2.869243] sgtl5000 1-000a: Failed to get supply 'VDDD': -19
+[    2.875312] print_constraints: 1-000a: 850 <--> 1600 mV at 1200 mV normal 
+[    2.883638] sgtl5000 1-000a: sgtl5000 revision 17
+[    2.907631] Max vol level set to 43
+[    2.913785] asoc: sgtl5000 <-> imx-ssi.1 mapping ok
+[    2.919604] input: sgtl5000-audio Headphone Jack as /devices/platform/soc-audio.1/sound/card0/input2
+[    2.929342] Initialize HDMI-audio failed. Load HDMI-video first!
+[    2.935488] ALSA device list:
+[    2.938522]   #0: sgtl5000-audio
+[    2.942211] oprofile: using arm/armv7-ca9
+[    2.946461] GACT probability NOT on
+[    2.950020] Mirror/redirect action on
+[    2.953768] u32 classifier
+[    2.956597]     Actions configured
+[    2.960064] Netfilter messages via NETLINK v0.30.
+[    2.964885] nf_conntrack version 0.5.0 (16384 buckets, 65536 max)
+[    2.971381] ctnetlink v0.93: registering with nfnetlink.
+[    2.976797] NF_TPROXY: Transparent proxy support initialized, version 4.1.0
+[    2.983900] NF_TPROXY: Copyright (c) 2006-2007 BalaBit IT Ltd.
+[    2.990496] xt_time: kernel timezone is -0000
+[    2.995026] IPv4 over IPv4 tunneling driver
+[    2.999852] GRE over IPv4 demultiplexor driver
+[    3.004406] ip_tables: (C) 2000-2006 Netfilter Core Team
+[    3.010195] arp_tables: (C) 2002 David S. Miller
+[    3.014948] TCP cubic registered
+[    3.018450] NET: Registered protocol family 10
+[    3.023837] Mobile IPv6
+[    3.026378] ip6_tables: (C) 2000-2006 Netfilter Core Team
+[    3.032063] IPv6 over IPv4 tunneling driver
+[    3.037649] NET: Registered protocol family 17
+[    3.042264] NET: Registered protocol family 15
+[    3.046874] Bluetooth: RFCOMM TTY layer initialized
+[    3.051850] Bluetooth: RFCOMM socket layer initialized
+[    3.057111] Bluetooth: RFCOMM ver 1.11
+[    3.060943] Bluetooth: BNEP (Ethernet Emulation) ver 1.3
+[    3.066375] Bluetooth: BNEP filters: protocol multicast
+[    3.071680] Bluetooth: HIDP (Human Interface Emulation) ver 1.2
+[    3.077887] L2TP core driver, V2.0
+[    3.081376] L2TP IP encapsulation support (L2TPv3)
+[    3.086274] L2TP netlink interface
+[    3.089811] L2TP ethernet pseudowire support (L2TPv3)
+[    3.094944] 802.1Q VLAN Support v1.8
+[    3.098614] VFP support v0.3: implementor 41 architecture 3 part 30 variant 9 rev 4
+[    3.106679] #############################
+[    3.110755] Read DQS Gating Calibration
+[    3.114731]  MMDC1_MPDGCTRL0 (0x083c) = 0x0314031e
+[    3.119587]  MMDC1_MPDGCTRL1 (0x0840) = 0x02370302
+[    3.124511]  MMDC2_MPDGCTRL0 (0x483c) = 0x03210325
+[    3.129366]  MMDC2_MPDGCTRL1 (0x4840) = 0x03140265
+[    3.134232] Read calibration
+[    3.137234]  MMDC1_MPRDDLCTL (0x0848) = 0x3834353a
+[    3.142102]  MMDC2_MPRDDLCTL (0x4848) = 0x3a382f3f
+[    3.147010] Write calibration
+[    3.150040]  MMDC1_MPWRDLCTL (0x0850) = 0x403b4540
+[    3.154907]  MMDC2_MPWRDLCTL (0x4850) = 0x48344a43
+[    3.159816] ZQ calibration
+[    3.162597]  MMDC1_MPZQHWCTRL (0x0800) = 0xa138ac03
+[    3.167538]  MMDC2_MPZQHWCTRL (0x4800) = 0xa1380000
+[    3.172544] #############################
+[    3.176823] Bus freq driver module loaded
+[    3.180926] Bus freq driver Enabled
+[    3.186661] mxc_dvfs_core_probe
+[    3.190098] DVFS driver module loaded
+[    3.195003] regulator_init_complete: PFUZE100_VGEN6: incomplete constraints, leaving on
+[    3.203388] regulator_init_complete: PFUZE100_VGEN3: incomplete constraints, leaving on
+[    3.211758] regulator_init_complete: PFUZE100_VGEN2: incomplete constraints, leaving on
+[    3.220056] regulator_init_complete: PFUZE100_VGEN1: incomplete constraints, leaving on
+[    3.228287] snvs_rtc snvs_rtc.0: setting system clock to 1970-01-01 00:00:00 UTC (0)
+[    3.236700] Freeing init memory: 208K
+[    8.852824] atmel_mxt_ts 2-004a: Running Self Test Command: fe
+[    8.922851] android_usb: already disabled
+[    8.924317] adb_open
+[    8.929539] android_usb: already disabled
+[    8.933876] mtp_bind_config
+root@android:/ # [    9.293068] moderox_remove_device_buttons: ModeroX remove keys (1)
+[    9.383014] Loading ModeroX G5 keys
+[    9.387475] input: gpio-keys as /devices/platform/gpio-keys/input/input3
+[   17.911952] warning: `zygote' uses 32-bit capabilities (legacy support in use)
+[   27.684584] request_suspend_state: wakeup (3->0) at 27453775670 (1970-01-02 00:00:09.755058000 UTC)
+[   27.694197] cpufreq_interactive_input_connect: connect to Atmel maXTouch Touchscreen
+[   30.219548] eth0: Freescale FEC PHY driver [Generic PHY] (mii_bus:phy_addr=1:00, irq=-1)
+[   30.229418] ADDRCONF(NETDEV_UP): eth0: link is not ready
+[   30.236182] ADDRCONF(NETDEV_UP): eth0.269: link is not ready
+[   30.363781] acc_open
+[   30.366112] acc_release
+[   30.820949] ehci_fsl_bus_resume begins, Host 1
+[   30.840985] ehci_fsl_bus_resume ends, Host 1
+[   30.863794] ehci_fsl_bus_resume begins, DR
+[   30.881034] ehci_fsl_bus_resume ends, DR
+[   30.901102] ehci_fsl_bus_resume begins, Host 2
+[   30.930884] ehci_fsl_bus_resume ends, Host 2
+[   33.211142] PHY: 1:00 - Link is Up - 100/Full
+[   33.216813] ADDRCONF(NETDEV_CHANGE): eth0: link becomes ready
+[   33.224284] ADDRCONF(NETDEV_CHANGE): eth0.269: link becomes ready
+[   33.240991] ehci_fsl_bus_suspend begins, Host 1
+[   33.246175] ehci_fsl_bus_suspend ends, Host 1
+[   33.250731] ehci_fsl_bus_suspend begins, DR
+[   33.255475] ehci_fsl_bus_suspend ends, DR
+[   35.300913] ehci_fsl_bus_suspend begins, Host 2
+[   35.306086] ehci_fsl_bus_suspend ends, Host 2
+[   37.072560] init: sys_prop: permission denied uid:1003  name:service.bootanim.exit
+[   42.083904] ehci_fsl_bus_resume begins, Host 2
+[   42.100889] ehci_fsl_bus_resume ends, Host 2
+[   42.131090] usb 1-1: USB disconnect, device number 2
+[   44.240876] ehci_fsl_bus_suspend begins, Host 2
+[   44.245695] ehci_fsl_bus_suspend ends, Host 2
+[   45.831901] input: Generic as /devices/virtual/input/input4
+[   45.840901] cpufreq_interactive_input_connect: connect to Generic
+[   46.103079] input: Generic as /devices/virtual/input/input5
+[   46.112291] cpufreq_interactive_input_connect: connect to Generic

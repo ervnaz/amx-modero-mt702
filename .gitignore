@@ -1,0 +1,7 @@
+# large binaries / build outputs kept out of git
+*.img
+*.imx
+*.bin
+rootfs/
+u-boot/
+linux/

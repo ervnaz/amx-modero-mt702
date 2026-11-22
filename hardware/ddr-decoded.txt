@@ -1,0 +1,54 @@
+// AMX Modero MT-702 (i.MX6Q) — DDR config decoded from live stock registers
+// DDR3, 528MHz (DDR3-1066), 64-bit bus, 2GB, 1 chip-select
+
+/* ---- raw MMDC config registers (for direct-write SPL) ---- */
+  MDCTL   (0x021b0000) = 0x841a0000
+  MDPDC   (0x021b0004) = 0x00025576
+  MDOTC   (0x021b0008) = 0x09444040
+  MDCFG0  (0x021b000c) = 0x898e7955
+  MDCFG1  (0x021b0010) = 0xff318f64
+  MDCFG2  (0x021b0014) = 0x01ff00db
+  MDMISC  (0x021b0018) = 0x40011740
+  MDREF   (0x021b0020) = 0x00007800
+  MDRWD   (0x021b002c) = 0x000026d2
+  MDOR    (0x021b0030) = 0x008e1023
+  MDASP   (0x021b0040) = 0x00000047
+  MAPSR   (0x021b0404) = 0x00001046
+  MDSCR   (0x021b001c) = 0x00000000
+
+/* ---- struct mx6_mmdc_calibration ---- */
+  .p0_mpwldectrl0 = 0x001f001f,
+  .p0_mpwldectrl1 = 0x001f001f,
+  .p1_mpwldectrl0 = 0x001f001f,
+  .p1_mpwldectrl1 = 0x001f001f,
+  .p0_mpdgctrl0   = 0x0314031e,
+  .p0_mpdgctrl1   = 0x02370302,
+  .p1_mpdgctrl0   = 0x03210325,
+  .p1_mpdgctrl1   = 0x03140265,
+  .p0_mprddlctl   = 0x3834353a,
+  .p1_mprddlctl   = 0x3a382f3f,
+  .p0_mpwrdlctl   = 0x403b4540,
+  .p1_mpwrdlctl   = 0x48344a43,
+
+/* ---- struct mx6_ddr_sysinfo (derived) ---- */
+  .dsize      = 2,   // 64-bit bus (DSIZ=2)
+  .cs_density = 18,   // from MDASP CS0_END=0x47
+  .ncs        = 1,   // SDE0=1 SDE1=0
+  .bi_on      = 1,
+  .mif3_mode  = 3,
+  .rst_to_cke = 0x23,  // MDOR
+  .sde_to_rst = 0x10,  // MDOR
+  .ralat      = 5,   .walat = 1,
+  .refsel=1, .refr=7,  // MDREF
+
+/* ---- struct mx6_ddr3_cfg (derived) ---- */
+  .mem_speed = 1066,
+  .density   = 4,      // 4Gbit/chip (4x16-bit = 2GB, 64-bit)
+  .width     = 16,
+  .banks     = 8,
+  .rowaddr   = 15,
+  .coladdr   = 10,
+  .pagesz    = 2,
+  .trcd=8, .trcmin=26, .trasmin=18,  // from MDCFG1 (ticks)
+
+/* ---- UART1 console: need AMX iomux pads (check IOMUXC dump / stock) ---- */
