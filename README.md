@@ -135,8 +135,14 @@ plugin** (that code targets i.MX8/9), so the ROM never runs ours.
 `booti`, so rather than hand-write an i.MX6 plugin to re-solve DDR, we hand the stock
 bootloader *our* mainline kernel (appended DTB, wrapped as a boot image) with Debian boot
 args. Distro/security updates then behave like any Debian box; only *kernel* updates need
-a rebuild-and-reflash (scriptable). A clean mainline U-Boot (writing that plugin) is a
-later, optional project. **Next step:** build the kernel with `CONFIG_ARM_APPENDED_DTB`,
+a rebuild-and-reflash (scriptable). A clean, modern U-Boot is a later,
+optional project — and the better route for it is **NXP's `uboot-imx`** (the vendor fork
+AMX itself built the stock loader from — note the stock build path `.../uboot-imx/...`),
+which *has* the i.MX6 plugin mainline lacks. A recent `uboot-imx` for `mx6qsabresd` in
+plugin mode + our captured DDR values would boot on this board's ROM *and* bring
+extlinux/distro-boot (erasing the kernel-reflash friction). That's just one component
+from NXP's git — not a switch to their Yocto BSP; the Debian rootfs stays. i.MX6Q is
+still supported in NXP's current BSP (Linux 6.18, 2026). **Next step:** build the kernel with `CONFIG_ARM_APPENDED_DTB`,
 wrap it as a boot image `booti` accepts, flash it to the boot partition, set Debian
 `bootargs` (`root=/dev/mmcblk0pX` instead of Android's `init=/init`).
 
