@@ -9,7 +9,7 @@ This repo documents the whole journey, the dead ends, and — more usefully — 
 device tree) that anyone reviving one of these panels will need.
 
 > **Status:** Android/HA panel = **done and working**. Mainline Debian port =
-> **in progress** — the silent-U-Boot mystery is solved: the board needs the non-SPL/DCD U-Boot build mode (which takes our extracted DDR directly); that U-Boot is built, verified, and awaiting one boot test (see [§5](#5-bare-metal-linux-debian--in-progress)).
+> **blocked on hardware, not software** — the real obstacle turned out to be **SD-card boot compatibility**: this panel's i.MX6 boot ROM only loads from specific (Apacer Industrial-class) microSD cards, so every "silent U-Boot" was the card never being read, not our bootloader failing. On a card the ROM accepts, plain DCD (plugin=0) is confirmed dead — a **plugin=1 image is required** — and our mainline-built plugin won't execute. Not a vendor lock (boot fuses blank, the plugin reads no card CID). Path forward: reuse the stock plugin to launch a modern U-Boot (see [§5](#5-bare-metal-linux-debian--in-progress)).
 
 ---
 
@@ -150,6 +150,50 @@ then wire `extlinux` to our `zImage` + DTB.
 > (i.MX6 SABRE-SD-class), survey what already exists before hand-rolling. The board-specific
 > work (console pinout, live DDR extraction) was real and necessary; the days-long blocker
 > was just a build-mode choice the ecosystem had solved long ago.
+
+### 5b. The real wall: it was the SD card all along
+
+Everything above was true — but the "non-SPL/DCD fix" and a long night of bootloader work
+after it were debugging code that **never ran a single instruction**. The DCD, the plugin,
+the ROM-API fixes — all **dead silent, every time**. The tell we kept rationalising away:
+**zero positive evidence the boot ROM was ever reading our card.**
+
+The breakthrough was a question, not a fix: *could the panel just not read this SD card?*
+Test: write the **known-good stock bootloader** to our other microSD cards and boot them.
+
+| microSD | stock bootloader written | result |
+|---|---|---|
+| Apacer Industrial 16 GB (panel's own) | ✓ | boots Android |
+| Kingston 2 GB | ✓ (verified on card) | **dead silent** |
+| Kioxia 32 GB ("Debian card") | ✓ — 4 MB region *and* full 16 GB image | **dead silent** |
+
+The **i.MX6 boot ROM reads SD in a slow, picky mode at power-on**; cards fine in a PC reader
+often won't initialise in that window. The factory card is an **Apacer *Industrial*** part;
+our spares weren't. **Every silent boot of the whole project was the ROM never loading the
+image off the card** — our bootloaders were never getting a turn.
+
+**Not a vendor lock** (we checked both ways): the stock OCRAM plugin **never touches the SD
+controller** (can't check a CID), and the boot-config **fuses are blank** (`BT_FUSE_SEL=0`,
+`BMOD=0` — read live over the serial root shell + `devmem` on OCOTP), so the chip boots from
+GPIO straps with no card binding. Nothing to unlock — just hardware pickiness.
+
+With a card the ROM *does* read, we finally ran our own code and learned: **plugin=0 (plain
+DCD) does not boot on this board** — a plugin=1 image is *required*, not optional. And our
+**mainline-built plugin images don't run either** (the stock NXP plugin runs every time).
+We found + fixed one real header bug — mainline sets the plugin's OCRAM load length to 64 KB,
+overrunning the ROM's own stack; stock uses 16 KB (patch the `boot_data.length` word at image
+offset `0x24`) — still silent. Some deeper `imximage`/ROM plugin-format incompatibility remains.
+
+**Path forward: reuse the stock plugin.** It provably inits this board's DDR and hands off
+correctly — so splice a modern mainline U-Boot into the stock image in place of the 2009
+vendor U-Boot and let the proven plugin do the hard part. The board-specific unknowns
+(console, DDR, card compatibility, the plugin requirement) are all answered; what's left is
+assembly.
+
+> **The deeper lesson:** *validate the most upstream assumption before debugging downstream.*
+> We spent days on DDR timing, IVT offsets and ROM-API tables — careful work on top of a
+> layer that was quietly broken (the ROM couldn't read the card). The cheapest question —
+> *does the thing even load?* — would have saved all of it. Ask it first.
 
 ---
 
