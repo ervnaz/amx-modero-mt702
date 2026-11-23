@@ -41,6 +41,7 @@ echo ">> installing /boot (kernel + dtb + extlinux)"
 mkdir -p "$MNT/boot/extlinux"
 cp "$SRC/linux/arch/arm/boot/zImage"                              "$MNT/boot/zImage"
 cp "$SRC/linux/arch/arm/boot/dts/nxp/imx/imx6q-sabresd.dtb"       "$MNT/boot/imx6q-sabresd.dtb"
+cp "$SRC/boot.scr"                                                "$MNT/boot/boot.scr"   # DCD U-Boot boots this
 cat > "$MNT/boot/extlinux/extlinux.conf" <<EOF
 default debian
 timeout 30
@@ -54,8 +55,8 @@ sync
 umount $MNT
 rmdir $MNT 2>/dev/null || true
 
-echo ">> writing U-Boot(SPL) to $DEV at 1KiB offset"
-dd if="$SRC/u-boot/u-boot-with-spl.imx" of="$DEV" bs=1K seek=1 conv=fsync status=none
+echo ">> writing U-Boot (non-SPL/DCD, DDR via boot-ROM DCD) to $DEV at 1KiB offset"
+dd if="$SRC/u-boot-modero-dcd.imx" of="$DEV" bs=1K seek=1 conv=fsync status=none
 sync
 echo ""
 echo "=== SD READY ==="
