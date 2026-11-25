@@ -217,6 +217,8 @@ logs/       stock-boot.log                  — stock U-Boot + kernel boot log
 BUILD-PLAN.md                               — the staged Debian build plan
 ```
 
+SD-card imaging commands and which cards boot: [docs/sdcard-imaging.md](docs/sdcard-imaging.md)
+
 ## Key gotchas (hard-won)
 
 - **No eMMC, no secure boot** → the whole device is reflashable by editing the SD offline.
