@@ -8,8 +8,18 @@ This repo documents the whole journey, the dead ends, and — more usefully — 
 **reusable tools and the exact board-specific data** (DDR config, console pinout,
 device tree) that anyone reviving one of these panels will need.
 
-> **Status:** Android/HA panel = **done and working**. Mainline Debian port =
-> **blocked on hardware, not software** — the real obstacle turned out to be **SD-card boot compatibility**: this panel's i.MX6 boot ROM only loads from specific (Apacer Industrial-class) microSD cards, so every "silent U-Boot" was the card never being read, not our bootloader failing. On a card the ROM accepts, plain DCD (plugin=0) is confirmed dead — a **plugin=1 image is required** — and our mainline-built plugin won't execute. Not a vendor lock (boot fuses blank, the plugin reads no card CID). Path forward: reuse the stock plugin to launch a modern U-Boot (see [§5](#5-bare-metal-linux-debian--in-progress)).
+> **Status:** Android/HA panel = **done and working**. **Bare-metal Debian 12 now
+> boots to a root shell on the panel** — a modern **U-Boot 2020.04** (NXP **uboot-imx**
+> plugin, *not* the 2009 vendor bootloader) → kernel **6.6** → `modero login:`. The long
+> "silent U-Boot" saga had two root causes, both solved: **(1) SD boot is a cold-start
+> timing race**, not a card/vendor lock (boot fuses blank, the plugin reads no CID) — the
+> i.MX6 ROM's impatient SD init (single un-retried CMD0) races the card's power-on, so you
+> need a card *and a power supply* that win the race (a passive PoE injector loses it; the
+> PoE switch wins); **(2) our earlier plugin/DDR builds** — the fix was NXP's uboot-imx
+> plugin with reference DDR plus three board patches (non-fatal PMIC, FAT+ext4 SD layout,
+> `disable-wp` for a phantom write-protect GPIO). Reproduce: [`uboot/uboot-imx-build-notes.md`](uboot/uboot-imx-build-notes.md)
+> + [`sdcard/make-debian-sd.sh`](sdcard/make-debian-sd.sh). **Next:** a proper
+> `imx6q-modero.dts` (LVDS panel, maXTouch, PFUZE100, 2 GB DDR) then the HA kiosk. See [§5](#5-bare-metal-linux-debian--in-progress).
 
 ---
 
