@@ -80,6 +80,18 @@ USB-OTG, *not* UART, so we had to find and wire physical pins. The saga:
 
 - The panel has a 4‑pin `J3 DEBUG` header on the interface board. **Pinout (board silk):
   `pin 1 = VCC (3.3V, do not connect), pin 2 = TX, pin 3 = GND, pin 4 = RX`**, 115200 8N1.
+- **XIAO ESP32‑S3 ↔ J3 wiring** (from `bridge/bridge.ino`: `RXP=44`/D7, `TXP=43`/D6):
+
+  | XIAO pin | GPIO | direction | → J3 pin |
+  |----------|------|-----------|----------|
+  | D7       | GPIO44 | RX (← panel TX) | pin 2 (TX) |
+  | D6       | GPIO43 | TX (→ panel RX) | pin 4 (RX) |
+  | GND      | —    | ground          | pin 3 (GND) |
+  | —        | —    | leave open      | pin 1 (VCC — do **not** connect) |
+
+  Note: the XIAO re-enumerates between `/dev/ttyACM0` and `/dev/ttyACM1` on replug —
+  always `ls /dev/ttyACM*` and use the one present, or a silent (wrong) port looks
+  exactly like a dead panel.
 - **The CH340 trap:** this PC's `ch341` driver mangles baud rates (returns ~3 Mbit/s
   when set to 9600 — physically impossible). *Every* CH340-based adapter (an ESP8266,
   an Arduino Nano clone) produced pure garbage, which for a long time made the real
