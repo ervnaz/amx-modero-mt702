@@ -205,6 +205,62 @@ assembly.
 > layer that was quietly broken (the ROM couldn't read the card). The cheapest question —
 > *does the thing even load?* — would have saved all of it. Ask it first.
 
+### 5c. Debian boots — and the built-in Ethernet is dead hardware
+
+> **STATUS UPDATE (supersedes the "in progress" notes above).** Debian 12 (kernel 6.6.162)
+> **boots bare-metal via mainline U-Boot.** Serial console and display (LVDS 800x1280 +
+> backlight) work. The OS side is solid.
+>
+> | Milestone | State |
+> |---|---|
+> | U-Boot | done |
+> | Kernel + Debian boot | done |
+> | Display (LVDS + backlight) | done |
+> | Device-tree bring-up | mostly done |
+> | **Network** | **BLOCKED: built-in Ethernet hardware is dead, use USB** |
+> | Touch | not yet |
+> | Audio | not yet |
+> | Kiosk (Cage/Cog) + HA dashboard | not yet |
+
+#### STOP: do not debug the built-in Ethernet. The hardware has failed.
+
+The RJ45 / magnetics / LAN87xx PHY on the interface board is **physically dead** (this unit
+was a salvaged trash-find). It is **not** a configuration bug. Evidence:
+
+- TX worked, **RX stayed 0**, and the link flapped about every 1 s through *every* config
+  change; the switch port LED never lit.
+- **Stock Android also fails to get connectivity on all switch ports**, so config is irrelevant.
+- A **laptop on the exact same cable** gets link and lights the switch LED, so cable and switch are good.
+- Software cannot physically damage a PHY.
+
+**Path forward: a USB-Ethernet dongle.** The panel has USB, and the drivers (`smsc95xx`,
+`asix`, `ax88179`, `r8152`, `cdc_ether`) are already in the rootfs. The FEC device-tree
+work is correct but moot unless the hardware is repaired.
+
+#### Device-tree lessons (all fixed in [`dts/imx6q-modero.dts`](dts/imx6q-modero.dts))
+
+1. **pinctrl groups must be nested under a function container.** Groups placed as direct
+   children of `&iomuxc` are ignored by the i.MX6 binding: the kernel only logs
+   "no groups defined in moderoenetgrp" and the **entire Modero pinmux silently never
+   applies** (pins keep U-Boot's leftover mux). Fix: wrap all groups in a `modero { }` node.
+2. **Pad double-claims cause a boot hang.** Once the pinmux really applied, pads claimed by
+   two nodes made the pinctrl core defer the SD controller (`2194000.mmc`) forever, giving
+   "Waiting for root device". Fixes: removed NANDF_D0/D2/D3 from the hog override (they belong
+   to the display/touch groups) and removed NANDF_D6 from the display group (it is SD2_DATA6,
+   needed by usdhc2, which holds the rootfs). **Before flashing, statically scan for pads
+   claimed by more than one group, and check your GPIO pads against the inherited sabresd
+   groups (`usdhc2grp` especially).**
+3. **Stock register values do not always translate to mainline.** FEC was iterated toward
+   the stock RMII setup (SMSC LAN8710/8720, RMII, SoC-provided 50 MHz clock; SION on
+   `MX6QDL_PAD_GPIO_16__ENET_REF_CLK` = `0x4001b0a8`, `phy-handle` + mdio `phy@0`,
+   `smsc,disable-energy-detect`). Caution: an earlier note claimed stock has SION; the live
+   IOMUX dump ([`hardware/ddr-regs.txt`](hardware/ddr-regs.txt), GPIO_16 mux reg at offset
+   `0x0248` = `0x02`) proves **stock has no SION**. Mainline *does* need it (the kernel's own
+   `imx6qdl-dhcom-som.dtsi` RMII board uses `0x4001b0a8`). Verify against the live dump
+   **and** mainline reference boards; stock (3.0 BSP) values are not gospel for 6.6.
+
+**Next:** USB Ethernet, then touch, audio, then the Cage/Cog kiosk and HA dashboard.
+
 ---
 
 ## Repo contents
@@ -221,7 +277,7 @@ sdcard/     make-sd.sh                      — assemble the Debian boot SD
             update-uboot.sh                 — re-write only U-Boot (self-verifying)
             image-stock.sh                  — read-only full image of the stock card
 rootfs/     rootfs-build.sh                 — debootstrap Debian armhf rootfs
-dts/        imx6q-modero.dts                — first-draft board device tree
+dts/        imx6q-modero.dts                — board device tree (pinctrl fixed; see 5c)
 uboot/      mx6sabresd-modero-ddr.patch     — AMX DDR values patched into mainline U-Boot
 logs/       stock-boot.log                  — stock U-Boot + kernel boot log
 BUILD-PLAN.md                               — the staged Debian build plan

@@ -1,123 +1,220 @@
 // SPDX-License-Identifier: GPL-2.0
-// AMX Modero MT-702 (i.MX6 Quad "Modero-X") — FIRST DRAFT board DT.
-// Strategy: boot once with the stock imx6q-sabresd.dtb to get a serial login, THEN
-// drop this in and iterate display -> touch -> audio over the serial console.
-// Confirmed values come from the live stock device; items marked TODO/VERIFY need
-// checking against boot logs (and, for exact panel porches, the panel datasheet).
-//
-// Build: copy into linux/arch/arm/boot/dts/nxp/imx/, add to the Makefile, `make dtbs`.
-
+/*
+ * AMX Modero MT-702 (i.MX6 Quad) — mainline device tree, first cut.
+ *
+ * Board is a SABRE-SD/SabreAuto derivative, so we inherit imx6q-sabresd.dts
+ * (working UART console, uSDHC, clocks) and override the Modero-specific parts
+ * from the live stock extraction (see modero-board-data.md):
+ *   - LVDS 7" 800x1280 panel (LDB ch0 -> IPU DI0, 24-bit SPWG) + power/reset + backlight
+ *   - FEC: generic PHY @ addr 0, reset GPIO5_IO17, real MAC
+ *   - maXTouch mXT336T on i2c3 @0x4a, INT GPIO2_IO02, RST GPIO2_IO03
+ *   - uSDHC2 phantom write-protect -> disable-wp
+ *
+ * ITERATE: panel pixel-timing is a reasonable 800x1280@60 guess (tune visually);
+ * the 7" panel also has a 3-wire SPI config bus (disp7-sclk/sda/ss on GPIO4) that
+ * MAY need an init sequence — try power+reset+LVDS first.
+ */
 /dts-v1/;
-#include "imx6q.dtsi"
-#include "imx6qdl-sabresd.dtsi"   // reuse SoC plumbing (uart1, fec, usdhc, iomuxc, i2c pinmux)
+#include "imx6q-sabresd.dts"
 
 / {
-	model = "AMX Modero MT-702 (i.MX6 Quad Modero-X)";
-	compatible = "amx,modero-mx6", "fsl,imx6q-sabresd", "fsl,imx6q";
+	model = "AMX Modero MT-702 (i.MX6 Quad)";
+	compatible = "amx,imx6q-modero", "fsl,imx6q-sabresd", "fsl,imx6q";
 
-	memory@10000000 {
-		device_type = "memory";
-		reg = <0x10000000 0x70000000>;	// 1.75 GB (confirmed MemTotal ~1762336 kB)
-	};
+	/* Modero drives LVDS *channel 0*; remove sabresd's channel-1
+	 * Hannstar 1024x768 panel (its mode conflicts and blocks the fbdev modeset).
+	 * The existing backlight_lvds stays on and lights our panel. */
+	/delete-node/ panel;
+};
 
-	/* LVDS panel: native 800x1280@60, RGB24 (24-bit), single LVDS channel on DI0.
-	 * TODO/VERIFY exact timings (porches/clock) — these are a reasonable 800x1280@60
-	 * starting point; refine from the panel datasheet if the image is unstable. */
-	panel_lvds: panel-lvds {
-		compatible = "panel-lvds";
-		backlight = <&backlight_modero>;
-		width-mm = <94>;	// ~7" 800x1280 — VERIFY
-		height-mm = <151>;
-		data-mapping = "vesa-24";
-		panel-timing {
-			clock-frequency = <68000000>;	// ~68 MHz for 800x1280@60 — VERIFY
-			hactive = <800>;
-			vactive = <1280>;
-			hfront-porch = <20>;
-			hsync-len = <24>;
-			hback-porch = <20>;
-			vfront-porch = <10>;
-			vsync-len = <4>;
-			vback-porch = <10>;
-			hsync-active = <0>;
-			vsync-active = <0>;
-			de-active = <1>;
-			pixelclk-active = <1>;
-		};
-		port {
-			panel_in_modero: endpoint {
-				remote-endpoint = <&lvds0_out>;
-			};
-		};
-	};
-
-	backlight_modero: backlight {
-		compatible = "pwm-backlight";
-		pwms = <&pwm1 0 5000000>;	// TODO/VERIFY which PWM drives the backlight
-		brightness-levels = <0 8 16 32 64 128 192 255>;
-		default-brightness-level = <6>;
+/* Disable the unused LDB channel 1 (sabresd wired its panel here). */
+&ldb {
+	lvds-channel@1 {
+		status = "disabled";
+		/delete-node/ port@4;	/* removes the dangling panel endpoint */
 	};
 };
 
-/* Display: single LVDS channel 0, 24-bit "spwg", on IPU DI0 (stock: ldb=sin0, DI0). */
+&iomuxc {
+    /* i.MX6 pinctrl is two-level: pin groups MUST sit under a function
+     * container node. As direct children of &iomuxc the driver treats each
+     * group as a function, logs "no groups defined", and the whole Modero
+     * pinmux silently never applies (pins stay on U-Boot's leftover mux). */
+    modero {
+	/* Panel power/reset + FEC phy reset, all muxed as GPIO
+	 * (DISP0_DAT* and NANDF_D* pads are free because the panel is LVDS). */
+	pinctrl_modero_disp: moderodispgrp {
+		fsl,pins = <
+			MX6QDL_PAD_DISP0_DAT13__GPIO5_IO07 0x1b0b0 /* disp7-5v-enable */
+			MX6QDL_PAD_DISP0_DAT11__GPIO5_IO05 0x1b0b0 /* disp7-reset    */
+			/* NANDF_D6 (display-pwr-en, 10" variant) REMOVED: it is SD2_DATA6
+			 * for usdhc2 (the rootfs SD); claiming it here failed the SD
+			 * controller probe and hung the boot. This 7" unit doesn't need it. */
+			MX6QDL_PAD_NANDF_D0__GPIO2_IO00    0x1b0b0 /* disp10-5v-enable*/
+		>;
+	};
+	pinctrl_modero_enet_rst: moderoenetrstgrp {
+		fsl,pins = <
+			MX6QDL_PAD_DISP0_DAT23__GPIO5_IO17 0x1b0b0 /* enet-phy-reset */
+		>;
+	};
+	/* ENET pinmux matching the STOCK live register dump (ddr-regs.txt):
+	 * the key fix vs sabresd is NOT muxing ENET_REF_CLK pad as ENET_TX_CLK
+	 * (stock leaves it as GPIO1_IO23); GPIO_16 feeds ENET_REF_CLK WITHOUT SION. */
+	/* RMII (SMSC LAN8710/8720, 100M) — matches the stock ENET pin mux (all ALT1). */
+	pinctrl_modero_enet: moderoenetgrp {
+		fsl,pins = <
+			MX6QDL_PAD_ENET_MDIO__ENET_MDIO		0x1b0b0
+			MX6QDL_PAD_ENET_MDC__ENET_MDC		0x1b0b0
+			MX6QDL_PAD_ENET_TX_EN__ENET_TX_EN	0x1b0b0
+			MX6QDL_PAD_ENET_TXD0__ENET_TX_DATA0	0x1b0b0
+			MX6QDL_PAD_ENET_TXD1__ENET_TX_DATA1	0x1b0b0
+			MX6QDL_PAD_ENET_RXD0__ENET_RX_DATA0	0x1b0b0
+			MX6QDL_PAD_ENET_RXD1__ENET_RX_DATA1	0x1b0b0
+			MX6QDL_PAD_ENET_RX_ER__ENET_RX_ER	0x1b0b0
+			MX6QDL_PAD_ENET_CRS_DV__ENET_RX_EN	0x1b0b0
+			MX6QDL_PAD_GPIO_16__ENET_REF_CLK	0x4001b0a8  /* 50MHz RMII ref out on GPIO_16 WITH SION. Mainline needs SION here (kernel's own imx6qdl-dhcom-som rmii board uses this exact value); the old Android BSP clocked it without SION, so the stock dump doesn't translate. */
+			MX6QDL_PAD_ENET_REF_CLK__GPIO1_IO23	0x1b0b0  /* stock: this pad is GPIO */
+		>;
+	};
+	pinctrl_modero_mxt: moderomxtgrp {
+		fsl,pins = <
+			MX6QDL_PAD_NANDF_D2__GPIO2_IO02 0x1b0b0 /* maXTouch INT */
+			MX6QDL_PAD_NANDF_D3__GPIO2_IO03 0x1b0b0 /* maXTouch RST */
+		>;
+	};
+    };	/* modero function container */
+};
+
+/* Assert panel power rails + de-assert panel reset at boot (stock had these "out hi"). */
+&gpio2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_modero_disp>;
+
+	/* disp-pwr-en-hog (GPIO2_IO06 / NANDF_D6) REMOVED — that pad is SD2_DATA6. */
+	disp10-5v-hog {
+		gpio-hog;
+		gpios = <0 GPIO_ACTIVE_HIGH>;	/* GPIO2_IO00 disp10-5v-enable */
+		output-high;
+		line-name = "disp10-5v-enable";
+	};
+};
+
+&gpio5 {
+	panel-5v-hog {
+		gpio-hog;
+		gpios = <7 GPIO_ACTIVE_HIGH>;	/* GPIO5_IO07 disp7-5v-enable */
+		output-high;
+		line-name = "disp7-5v-enable";
+	};
+	panel-reset-hog {
+		gpio-hog;
+		gpios = <5 GPIO_ACTIVE_HIGH>;	/* GPIO5_IO05 disp7-reset (de-assert) */
+		output-high;
+		line-name = "disp7-reset";
+	};
+};
+
+/* LVDS: single channel 0 from IPU DI0, 24-bit SPWG, 800x1280@60 (GPR2=0x2a1). */
 &ldb {
 	status = "okay";
-	/delete-node/ lvds-channel@1;	// SABRE's 18-bit ch1 panel — not ours
+
 	lvds-channel@0 {
 		fsl,data-mapping = "spwg";
 		fsl,data-width = <24>;
 		status = "okay";
-		port@4 {
-			reg = <4>;
-			lvds0_out: endpoint {
-				remote-endpoint = <&panel_in_modero>;
+
+		display-timings {
+			native-mode = <&timing_modero>;
+			/* TODO: tune porches to the exact panel; 800x1280@60 ~68MHz */
+			timing_modero: timing-800x1280 {
+				clock-frequency = <68000000>;
+				hactive = <800>;
+				vactive = <1280>;
+				hback-porch = <24>;
+				hfront-porch = <24>;
+				hsync-len = <8>;
+				vback-porch = <4>;
+				vfront-porch = <8>;
+				vsync-len = <4>;
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <1>;
+				pixelclk-active = <0>;
 			};
 		};
 	};
 };
 
-/* ---- I²C layout (authoritative, read from the live device) ----
- * i2c1: PFUZE100 @0x08 (inherited from sabresd dtsi — keep), EEPROM 24c02 @0x50
- * i2c2: USB3503 @0x08, SGTL5000 @0x0a, pots AD5245 @0x2c / AD5243 @0x2f
- * i2c3: Atmel maXTouch mXT336T @0x4a
- * NOTE: sabresd.dtsi declares a WM8962 codec on i2c1 and other devices that we DON'T
- * have — those nodes may need /delete-node/ or status="disabled" once we see which
- * probes fail. Handle during serial bring-up. */
-
-&i2c1 {
-	eeprom@50 {
-		compatible = "atmel,24c02";
-		reg = <0x50>;
-		pagesize = <16>;
-	};
-};
-
-&i2c2 {
+&pwm1 {
 	status = "okay";
-	sgtl5000: codec@0a {
-		compatible = "fsl,sgtl5000";
-		reg = <0x0a>;
-		clocks = <&clks IMX6QDL_CLK_CKO>;	// VERIFY codec MCLK source
-		VDDA-supply = <&reg_module_3v3>;	// VERIFY regulator names on this board
-		VDDIO-supply = <&reg_module_3v3>;
-	};
-	usb3503@08 {
-		compatible = "smsc,usb3503";
-		reg = <0x08>;
-		/* TODO: reset/connect/intn GPIOs from board file (unknown) */
-	};
-	/* AD5245 @0x2c, AD5243 @0x2f — likely VCOM/gain; add if needed */
 };
 
+/* FEC: RMII to an SMSC LAN8710/8720 PHY at MDIO addr 0, SoC-sourced 50MHz ref
+ * clock (out on GPIO_16 = ENET_REF_CLK, SION loops it back to clock the MAC).
+ * The full RMII pinmux is pinctrl_modero_enet (matches the stock reg dump);
+ * reset the PHY on GPIO5_IO17. MDIO now binds the real SMSC driver. */
+&fec {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_modero_enet &pinctrl_modero_enet_rst>;
+	phy-mode = "rmii";	/* SMSC LAN8710/8720, 100M RMII (NOT gigabit) */
+	local-mac-address = [00 60 9F A5 B3 ED];
+	phy-handle = <&ethphy_modero>;
+	fsl,magic-packet;
+	status = "okay";	/* enet_ref stays at its 50MHz default for RMII */
+
+	/delete-node/ mdio;	/* drop sabresd's Atheros phy@1 */
+
+	mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		ethphy_modero: ethernet-phy@0 {
+			reg = <0>;
+			/* SMSC LAN8710/8720 keeps EDPD on in POLL mode, which powers
+			 * the PHY down on brief idle -> ~1s link flap that blocks
+			 * RX/DHCP. Disable energy-detect to hold the link steady. */
+			smsc,disable-energy-detect;
+			reset-gpios = <&gpio5 17 GPIO_ACTIVE_LOW>;
+			reset-assert-us = <20000>;
+			reset-deassert-us = <100000>;
+		};
+	};
+};
+
+/* uSDHC2 = the boot SD (mmcblk1). The Modero has no WP line; ignore the phantom one. */
+&usdhc2 {
+	disable-wp;
+};
+
+/* maXTouch mXT336T on I2C3 @0x4a. */
 &i2c3 {
+	clock-frequency = <100000>;
 	status = "okay";
+
 	touchscreen@4a {
 		compatible = "atmel,maxtouch";
 		reg = <0x4a>;
-		/* TODO/VERIFY: interrupt GPIO + reset GPIO (unknown — from board file or scope) */
-		/* interrupt-parent = <&gpioX>; interrupts = <Y IRQ_TYPE_EDGE_FALLING>; */
+		status = "disabled";	/* isolation: re-enable once display is confirmed */
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_modero_mxt>;
+		interrupt-parent = <&gpio2>;
+		interrupts = <2 IRQ_TYPE_EDGE_FALLING>;	/* GPIO2_IO02 */
+		reset-gpios = <&gpio2 3 GPIO_ACTIVE_LOW>;	/* GPIO2_IO03 captouch-rst (stock holds hi=run) */
 	};
 };
 
-/* UART1 = console (ttymxc0 @ 115200) — provided by sabresd dtsi. */
-/* FEC ethernet — provided by sabresd dtsi; MAC comes from U-Boot (ethaddr). */
+/* Modero drives ENET_TXD1 + ENET_CRS_DV as RMII, so drop them from the sabresd
+ * GPIO hog (they'd otherwise conflict with the FEC's RMII pinmux). */
+/* Drop from sabresd's hog every pad the Modero repurposes into its own groups,
+ * else the pad is double-claimed -> pinctrl dependency cycle -> SD controller
+ * deferred -> boot hangs waiting for root. Removed here: ENET_TXD1/ENET_CRS_DV
+ * (now FEC RMII), NANDF_D0 (disp10-5v-enable), NANDF_D2/D3 (maXTouch INT/RST). */
+&pinctrl_hog {
+	fsl,pins = <
+		MX6QDL_PAD_NANDF_D1__GPIO2_IO01  0x1b0b0
+		MX6QDL_PAD_GPIO_0__CCM_CLKO1     0x130b0
+		MX6QDL_PAD_NANDF_CLE__GPIO6_IO07 0x1b0b0
+		MX6QDL_PAD_EIM_D22__GPIO3_IO22   0x1b0b0
+	>;
+};
